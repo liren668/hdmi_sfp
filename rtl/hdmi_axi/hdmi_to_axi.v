@@ -40,6 +40,7 @@ reg [23:0]      video_rgb_in_d0;         // RGB888颜色数据寄存器
 reg             prev_de;                 // 前一个DE信号，用于检测边沿
 reg             vs_pose;                 // 场信号上升沿
 reg             vs_nege;                 // 场信号下降沿，新增场信号下降沿检测
+reg [2:0]       vs_nege_cnt;             // vs_nege展宽计数器，最多展宽到7个周期
 
 // 数据拼接和处理
 reg             frame_process_en;        // 帧处理使能信号
@@ -89,17 +90,26 @@ end
 
 //产生场信号上升沿和下降沿
 always@(posedge video_clk_in or negedge rst_n)begin
-	if(!rst_n) begin
-		vs_pose <= 1'b0;
-		vs_nege <= 1'b0;  // 初始化场信号下降沿标志
-	end else if(video_vs_in_d0 && ~video_vs_in_d1)
-		vs_pose <= 1'b1;  // 检测到场同步信号的上升沿，设置vs_pose为1
-	else if(~video_vs_in_d0 && video_vs_in_d1)
-		vs_nege <= 1'b1;  // 检测到场同步信号的下降沿，设置vs_nege为1
-    else begin
-		vs_pose <= 1'b0;  // 清除上升沿标志，确保只持续一个时钟周期
-		vs_nege <= 1'b0;  // 清除下降沿标志，确保只持续一个时钟周期
-	end
+    if(!rst_n) begin
+        vs_pose <= 1'b0;
+        vs_nege <= 1'b0;
+        vs_nege_cnt <= 3'd0; // 计数器复位
+    end else if(video_vs_in_d0 && ~video_vs_in_d1) begin
+        vs_pose <= 1'b1;
+    end else if(~video_vs_in_d0 && video_vs_in_d1) begin
+        // 检测到场同步信号下降沿，拉高vs_nege并启动展宽计数
+        vs_nege <= 1'b1;
+        vs_nege_cnt <= 3'd4; // 展宽4个时钟周期，可根据需要调整
+    end else begin
+        vs_pose <= 1'b0;
+        // 展宽vs_nege信号
+        if(vs_nege_cnt > 0) begin
+            vs_nege <= 1'b1;
+            vs_nege_cnt <= vs_nege_cnt - 1'b1;
+        end else begin
+            vs_nege <= 1'b0;
+        end
+    end
 end
 
 //==========================================================================

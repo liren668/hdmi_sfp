@@ -31,7 +31,8 @@ module sfp_tx_rx_module(
     output          txn_out,                // SFP差分发送负端
     output          txp_out,                // SFP差分发送正端
     output          tx_disable,             // SFP发送使能
-    output          tx_clk_out              // SFP发送时钟156.25MHz
+    output          tx_clk_out             // SFP发送时钟156.25MHz
+    // output          sfp_init_done           // SFP初始化完成信号
 );
 
 //==========================================================================
@@ -606,4 +607,5 @@ xxv_ethernet_0 u_xxv_ethernet_0 (
   .ctl_tx_custom_preamble_enable_0  (1'b0)     // input wire ctl_tx_custom_preamble_enable_0
 );
 assign  tx_disable = 2'b00;                     //打开光口
+// assign  sfp_init_done = stat_rx_status;
 endmodule 

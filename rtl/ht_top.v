@@ -64,6 +64,7 @@ wire        rst_cfg_hdmi; // HDMI芯片复位信号
 
 // SFP模块相关信号定义
 wire        tx_clk_out;             // SFP发送时钟156.25MHz
+// wire        sfp_init_done;          // SFP初始化完成信号
 
 //*****************************************************
 //**                    main code
@@ -164,6 +165,7 @@ sfp_tx_rx_module u_sfp_tx_rx_module(
     .txn_out            (txn_out),                // 差分发送负端
     .txp_out            (txp_out),                // 差分发送正端
     .tx_disable         (tx_disable),             // 发送使能
+    // .sfp_init_done      (sfp_init_done),          // SFP初始化完成信号
     
     // 输出时钟
     .tx_clk_out         (tx_clk_out)              // SFP发送时钟156.25MHz
