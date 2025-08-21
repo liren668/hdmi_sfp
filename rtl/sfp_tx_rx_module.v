@@ -1,87 +1,87 @@
 //----------------------------------------------------------------------------------------
 // File name:           sfp_tx_module.v
-// Created by:          Éºº÷ÒÁË¹ÌØ
+// Created by:          çŠç‘šç§‘æŠ€
 // Created date:        2025.5
 // Version:             V0.1
-// Descriptions:        SFP·¢ËÍÄ£¿é£¬°üº¬»·ĞÎ¶ÓÁĞºÍ·¢ËÍÂß¼­
-//                      HDMIÊı¾İ148.5MHzĞ´Èë»·ĞÎ¶ÓÁĞ£¬156.25MHz¶Á³ö·¢ËÍµ½SFP
+// Descriptions:        SFPå‘é€æ¨¡å—ï¼ŒåŒ…å«ç¯å½¢é˜Ÿåˆ—å’Œå‘é€é€»è¾‘
+//                      HDMIæ•°æ®148.5MHzå†™å…¥ç¯å½¢é˜Ÿåˆ—ï¼Œ156.25MHzè¯»å‡ºå‘é€åˆ°SFP
 //----------------------------------------------------------------------------------------
 
 module sfp_tx_rx_module(
-    // ÏµÍ³ĞÅºÅ
-    input                    sys_rst_n,           // ÏµÍ³¸´Î»ĞÅºÅ£¬µÍµçÆ½ÓĞĞ§
-    input                    locked_0,            // ËøÏà»·Ëø¶¨ĞÅºÅ
-    input                    wr_clk,              // Ğ´Ê±ÖÓ 148.5MHz
-    input                    sys_clk,             // ÏµÍ³Ê±ÖÓ100MHz
-    // input                    clk_ila,             // ILAÊ±ÖÓ300MHz
+    // ç³»ç»Ÿä¿¡å·
+    input                    sys_rst_n,           // ç³»ç»Ÿå¤ä½ä¿¡å·ï¼Œä½ç”µå¹³æœ‰æ•ˆ
+    input                    locked_0,            // é”ç›¸ç¯é”å®šä¿¡å·
+    input                    wr_clk,              // å†™æ—¶é’Ÿ 148.5MHz
+    input                    sys_clk,             // ç³»ç»Ÿæ—¶é’Ÿ100MHz
+    // input                    clk_ila,             // ILAæ—¶é’Ÿ300MHz
 
-    // HDMIÊı¾İÊäÈë½Ó¿Ú£¨148.5MHzÊ±ÖÓÓò£©
-    input                 hdmi_data_valid,     // HDMIÊı¾İÓĞĞ§
-    input      [63:0]     hdmi_data,           // HDMIÊı¾İ
+    // HDMIæ•°æ®è¾“å…¥æ¥å£ï¼ˆ148.5MHzæ—¶é’ŸåŸŸï¼‰
+    input                 hdmi_data_valid,     // HDMIæ•°æ®æœ‰æ•ˆ
+    input      [63:0]     hdmi_data,           // HDMIæ•°æ®
 
-    // HDMIÊı¾İÊä³ö½Ó¿Ú(·Ö·¢¸øHDMIÄ£¿é)
-    output reg      hdmi_axi_rx_valid,      // HDMI½ÓÊÕÊı¾İÓĞĞ§
-    output reg [63:0] hdmi_axi_rx_data,      // HDMI½ÓÊÕÊı¾İ
+    // HDMIæ•°æ®è¾“å‡ºæ¥å£(åˆ†å‘ç»™HDMIæ¨¡å—)
+    output reg      hdmi_axi_rx_valid,      // HDMIæ¥æ”¶æ•°æ®æœ‰æ•ˆ
+    output reg [63:0] hdmi_axi_rx_data,      // HDMIæ¥æ”¶æ•°æ®
 
-    // SFPÎïÀí½Ó¿Ú¶Ë¿Ú²¹È«
-    input           q0_ck1_n_in,            // ²Î¿¼Ê±ÖÓ¸º¶Ë156.25MHz
-    input           q0_ck1_p_in,            // ²Î¿¼Ê±ÖÓÕı¶Ë156.25MHz
-    input           rxn_in,                 // SFP²î·Ö½ÓÊÕ¸º¶Ë
-    input           rxp_in,                 // SFP²î·Ö½ÓÊÕÕı¶Ë
-    output          txn_out,                // SFP²î·Ö·¢ËÍ¸º¶Ë
-    output          txp_out,                // SFP²î·Ö·¢ËÍÕı¶Ë
-    output          tx_disable,             // SFP·¢ËÍÊ¹ÄÜ
-    output          tx_clk_out             // SFP·¢ËÍÊ±ÖÓ156.25MHz
-    // output          sfp_init_done           // SFP³õÊ¼»¯Íê³ÉĞÅºÅ
+    // SFPç‰©ç†æ¥å£ç«¯å£è¡¥å…¨
+    input           q0_ck1_n_in,            // å‚è€ƒæ—¶é’Ÿè´Ÿç«¯156.25MHz
+    input           q0_ck1_p_in,            // å‚è€ƒæ—¶é’Ÿæ­£ç«¯156.25MHz
+    input           rxn_in,                 // SFPå·®åˆ†æ¥æ”¶è´Ÿç«¯
+    input           rxp_in,                 // SFPå·®åˆ†æ¥æ”¶æ­£ç«¯
+    output          txn_out,                // SFPå·®åˆ†å‘é€è´Ÿç«¯
+    output          txp_out,                // SFPå·®åˆ†å‘é€æ­£ç«¯
+    output          tx_disable,             // SFPå‘é€ä½¿èƒ½
+    output          tx_clk_out             // SFPå‘é€æ—¶é’Ÿ156.25MHz
+    // output          sfp_init_done           // SFPåˆå§‹åŒ–å®Œæˆä¿¡å·
 );
 
 //==========================================================================
-// ²ÎÊı¶¨Òå
+// å‚æ•°å®šä¹‰
 //==========================================================================
-parameter LOCAL_NODE_INFO = 8'h12;      // ±¾µØ½ÚµãĞÅÏ¢
+parameter LOCAL_NODE_INFO = 8'h12;      // æœ¬åœ°èŠ‚ç‚¹ä¿¡æ¯
 localparam BOUNDARY_DATA = {48'hFEFEFEFEFEFE, 2'b11, 6'd0, LOCAL_NODE_INFO};
-// »·ĞÎ¶ÓÁĞ²ÎÊı
-localparam RING_DEPTH = 64;              // 64¸öÉî¶ÈµÄ»·ĞÎ¶ÓÁĞ
-localparam RING_ADDR_WIDTH = 6;          // »·ĞÎ¶ÓÁĞµØÖ·¿í¶ÈÎª6Î»
-// Êı¾İÀàĞÍ¶¨Òå
-parameter DATA_TYPE_HDMI = 4'h2;    // HDMIÊı¾İÀàĞÍ 0010
-parameter DATA_TYPE_ETH = 4'h1;     // ÒÔÌ«ÍøÊı¾İÀàĞÍ 0001
+// ç¯å½¢é˜Ÿåˆ—å‚æ•°
+localparam RING_DEPTH = 64;              // 64ä¸ªæ·±åº¦çš„ç¯å½¢é˜Ÿåˆ—
+localparam RING_ADDR_WIDTH = 6;          // ç¯å½¢é˜Ÿåˆ—åœ°å€å®½åº¦ä¸º6ä½
+// æ•°æ®ç±»å‹å®šä¹‰
+parameter DATA_TYPE_HDMI = 4'h2;    // HDMIæ•°æ®ç±»å‹ 0010
+parameter DATA_TYPE_ETH = 4'h1;     // ä»¥å¤ªç½‘æ•°æ®ç±»å‹ 0001
 
 //==========================================================================
-// hdmiÄÚ²¿ĞÅºÅ¶¨Òå
+// hdmiå†…éƒ¨ä¿¡å·å®šä¹‰
 //==========================================================================
-// »·ĞÎ¶ÓÁĞ´æ´¢
-reg [63:0]      hdmi_ring_data[0:RING_DEPTH-1];  // »·ĞÎ¶ÓÁĞÊı¾İ£¬64Î»¿í
-reg [RING_ADDR_WIDTH-1:0] hdmi_wr_ptr;           // Ğ´Ö¸Õë£¨148.5MHzÊ±ÖÓÓò£©
-reg [RING_ADDR_WIDTH-1:0] hdmi_rd_ptr;           // ¶ÁÖ¸Õë£¨156.25MHzÊ±ÖÓÓò£©
+// ç¯å½¢é˜Ÿåˆ—å­˜å‚¨
+reg [63:0]      hdmi_ring_data[0:RING_DEPTH-1];  // ç¯å½¢é˜Ÿåˆ—æ•°æ®ï¼Œ64ä½å®½
+reg [RING_ADDR_WIDTH-1:0] hdmi_wr_ptr;           // å†™æŒ‡é’ˆï¼ˆ148.5MHzæ—¶é’ŸåŸŸï¼‰
+reg [RING_ADDR_WIDTH-1:0] hdmi_rd_ptr;           // è¯»æŒ‡é’ˆï¼ˆ156.25MHzæ—¶é’ŸåŸŸï¼‰
 
-// ¿çÊ±ÖÓÓòÍ¬²½ĞÅºÅ
-(* ASYNC_REG = "TRUE" *) reg [RING_ADDR_WIDTH-1:0] hdmi_sync_wr_ptr_1;  // Ğ´Ö¸ÕëÍ¬²½µÚÒ»¼¶
-(* ASYNC_REG = "TRUE" *) reg [RING_ADDR_WIDTH-1:0] hdmi_sync_wr_ptr;    // Ğ´Ö¸ÕëÍ¬²½µÚ¶ş¼¶
+// è·¨æ—¶é’ŸåŸŸåŒæ­¥ä¿¡å·
+(* ASYNC_REG = "TRUE" *) reg [RING_ADDR_WIDTH-1:0] hdmi_sync_wr_ptr_1;  // å†™æŒ‡é’ˆåŒæ­¥ç¬¬ä¸€çº§
+(* ASYNC_REG = "TRUE" *) reg [RING_ADDR_WIDTH-1:0] hdmi_sync_wr_ptr;    // å†™æŒ‡é’ˆåŒæ­¥ç¬¬äºŒçº§
 
-// ¶ÓÁĞ×´Ì¬ĞÅºÅ
-wire            hdmi_ring_empty;         // »·ĞÎ¶ÓÁĞ¿Õ±êÖ¾
-wire            hdmi_ring_full;          // »·ĞÎ¶ÓÁĞÂú±êÖ¾£¨ÓÃÓÚĞ´Ê±ÖÓÓò£©
-reg [RING_ADDR_WIDTH-1:0] hdmi_next_wr_ptr;   // ÏÂÒ»¸öĞ´Ö¸Õë
+// é˜Ÿåˆ—çŠ¶æ€ä¿¡å·
+wire            hdmi_ring_empty;         // ç¯å½¢é˜Ÿåˆ—ç©ºæ ‡å¿—
+wire            hdmi_ring_full;          // ç¯å½¢é˜Ÿåˆ—æ»¡æ ‡å¿—ï¼ˆç”¨äºå†™æ—¶é’ŸåŸŸï¼‰
+reg [RING_ADDR_WIDTH-1:0] hdmi_next_wr_ptr;   // ä¸‹ä¸€ä¸ªå†™æŒ‡é’ˆ
 
-// ·¢ËÍ¿ØÖÆĞÅºÅ
-reg  [3:0]      send_type_cnt;           // ·¢ËÍÀàĞÍ¼ÆÊıÆ÷
+// å‘é€æ§åˆ¶ä¿¡å·
+reg  [3:0]      send_type_cnt;           // å‘é€ç±»å‹è®¡æ•°å™¨
 
-// ±ß½çÊı¾İÑÓÊ±ÇåÁã¿ØÖÆĞÅºÅ
-reg  [3:0]      hdmi_boundary_delay_cnt;      // HDMI±ß½çÊı¾İÑÓÊ±¼ÆÊıÆ÷£¨0-7£¬8¸öÖÜÆÚ£©
-reg             hdmi_boundary_detected;       // HDMI±ß½çÊı¾İ¼ì²â±êÖ¾
-wire            hdmi_clear_all;               // ÇåÁãËùÓĞHDMIÊı¾İºÍÖ¸ÕëµÄĞÅºÅ
+// è¾¹ç•Œæ•°æ®å»¶æ—¶æ¸…é›¶æ§åˆ¶ä¿¡å·
+reg  [3:0]      hdmi_boundary_delay_cnt;      // HDMIè¾¹ç•Œæ•°æ®å»¶æ—¶è®¡æ•°å™¨ï¼ˆ0-7ï¼Œ8ä¸ªå‘¨æœŸï¼‰
+reg             hdmi_boundary_detected;       // HDMIè¾¹ç•Œæ•°æ®æ£€æµ‹æ ‡å¿—
+wire            hdmi_clear_all;               // æ¸…é›¶æ‰€æœ‰HDMIæ•°æ®å’ŒæŒ‡é’ˆçš„ä¿¡å·
 
-// hdmi_clear_all¿çÊ±ÖÓÓòÍ¬²½£¨¶ÁÊ±ÖÓÓò ¡ú Ğ´Ê±ÖÓÓò£©
-(* ASYNC_REG = "TRUE" *) reg hdmi_clear_sync1;     // ÇåÁãĞÅºÅÍ¬²½µÚÒ»¼¶
-(* ASYNC_REG = "TRUE" *) reg hdmi_clear_sync2;     // ÇåÁãĞÅºÅÍ¬²½µÚ¶ş¼¶
+// hdmi_clear_allè·¨æ—¶é’ŸåŸŸåŒæ­¥ï¼ˆè¯»æ—¶é’ŸåŸŸ â†’ å†™æ—¶é’ŸåŸŸï¼‰
+(* ASYNC_REG = "TRUE" *) reg hdmi_clear_sync1;     // æ¸…é›¶ä¿¡å·åŒæ­¥ç¬¬ä¸€çº§
+(* ASYNC_REG = "TRUE" *) reg hdmi_clear_sync2;     // æ¸…é›¶ä¿¡å·åŒæ­¥ç¬¬äºŒçº§
 
 //==========================================================================
-// ÊÕ·¢Æ÷IPºËÄÚ²¿ĞÅºÅ¶¨Òå
+// æ”¶å‘å™¨IPæ ¸å†…éƒ¨ä¿¡å·å®šä¹‰
 //==========================================================================
 //SFP reg define
 reg  [27:0] dely_500ms ;
-reg  [2:0]  S_RESET;            //×´Ì¬ĞÅºÅ
+reg  [2:0]  S_RESET;            //çŠ¶æ€ä¿¡å·
 reg  [15:0] cnt_rst;
 reg         rst_n;
 reg         gtwiz_reset_rx_datapath;
@@ -90,25 +90,25 @@ wire        stat_rx_status;
 wire        tx_reset;
 wire        rx_reset;
 wire        gt0_rst;
-wire        gtpowergood_out_0;        // GTµçÔ´×´Ì¬ĞÅºÅ
-wire        tx_clk_out;             // ·¢ËÍÊ±ÖÓ
-wire        gt_refclk_out;          // ²Î¿¼Ê±ÖÓ
-wire        axis_to_sfp_tready;     // ·¢ËÍÊ¹ÄÜ
-wire [55:0] rx_preambleout;  // ½ÓÊÕÇ°µ¼Âë
+wire        gtpowergood_out_0;        // GTç”µæºçŠ¶æ€ä¿¡å·
+wire        tx_clk_out;             // å‘é€æ—¶é’Ÿ
+wire        gt_refclk_out;          // å‚è€ƒæ—¶é’Ÿ
+wire        axis_to_sfp_tready;     // å‘é€ä½¿èƒ½
+wire [55:0] rx_preambleout;  // æ¥æ”¶å‰å¯¼ç 
 wire        rx_axis_tuser;
 wire        tx_axis_tuser;
 
-// AXI·¢ËÍ½Ó¿Ú£¨·¢ËÍµ½SFP£©
-reg         axis_to_sfp_tvalid;     // Êı¾İÓĞĞ§ĞÅºÅ
-reg  [63:0] axis_to_sfp_tdata;      // ·¢ËÍÊı¾İ
-reg         axis_to_sfp_tlast;      // ×îºóÒ»ÅÄ±êÖ¾
-reg  [7:0]  axis_to_sfp_tkeep;      // ×Ö½ÚÓĞĞ§±êÖ¾
-// AXI½ÓÊÕ½Ó¿Ú£¨´ÓSFP½ÓÊÕ£©
-wire        sfp_to_axis_tvalid;     // Êı¾İÓĞĞ§
-wire [63:0] sfp_to_axis_tdata;      // ½ÓÊÕÊı¾İ´ÓSFP 
-wire        sfp_to_axis_tlast;      // ×îºóÒ»ÅÄ
-wire [7:0]  sfp_to_axis_tkeep;      // ×Ö½ÚÓĞĞ§
-// ¸´Î»¿ØÖÆ
+// AXIå‘é€æ¥å£ï¼ˆå‘é€åˆ°SFPï¼‰
+reg         axis_to_sfp_tvalid;     // æ•°æ®æœ‰æ•ˆä¿¡å·
+reg  [63:0] axis_to_sfp_tdata;      // å‘é€æ•°æ®
+reg         axis_to_sfp_tlast;      // æœ€åä¸€æ‹æ ‡å¿—
+reg  [7:0]  axis_to_sfp_tkeep;      // å­—èŠ‚æœ‰æ•ˆæ ‡å¿—
+// AXIæ¥æ”¶æ¥å£ï¼ˆä»SFPæ¥æ”¶ï¼‰
+wire        sfp_to_axis_tvalid;     // æ•°æ®æœ‰æ•ˆ
+wire [63:0] sfp_to_axis_tdata;      // æ¥æ”¶æ•°æ®ä»SFP 
+wire        sfp_to_axis_tlast;      // æœ€åä¸€æ‹
+wire [7:0]  sfp_to_axis_tkeep;      // å­—èŠ‚æœ‰æ•ˆ
+// å¤ä½æ§åˆ¶
 always@(posedge sys_clk)begin
     if(!locked_0)
         cnt_rst <= 16'b0;
@@ -118,8 +118,8 @@ always@(posedge sys_clk)begin
         cnt_rst <= cnt_rst;
 end 
 
-//SFPÊÕ·¢Æ÷¸´Î»ĞÅºÅ£¬µÍµçÆ½ÓĞĞ§
-assign gt0_rst = ~rst_n;    // ÏµÍ³¸´Î»Ê±GT¸´Î»£¬¸ßµçÆ½¸´Î»
+//SFPæ”¶å‘å™¨å¤ä½ä¿¡å·ï¼Œä½ç”µå¹³æœ‰æ•ˆ
+assign gt0_rst = ~rst_n;    // ç³»ç»Ÿå¤ä½æ—¶GTå¤ä½ï¼Œé«˜ç”µå¹³å¤ä½
 always@(posedge sys_clk)begin
     if(!locked_0)
         rst_n <= 1'b0;
@@ -131,7 +131,7 @@ always@(posedge sys_clk)begin
         rst_n <= rst_n;
 end
 
-//500ms¼ÆÊıÆ÷
+//500msè®¡æ•°å™¨
 always @(posedge sys_clk)begin
     if(!rst_n)begin
         S_RESET <= 1'b0;
@@ -180,7 +180,7 @@ always @(posedge sys_clk)begin
     end
 end
 
-//ILAÊµÀı»¯
+//ILAå®ä¾‹åŒ–
 // ila_1 u_ila_1 (
 //     .clk(clk_ila),              // input wire clk300Mhz
 //     .probe0(hdmi_data_valid),   // input wire [63:0]  probe0  
@@ -194,77 +194,77 @@ end
 //     .probe8(sfp_to_axis_tdata),   // input wire [7:0]  probe6 
 //     .probe9(sfp_to_axis_tlast)   // input wire [7:0]  probe6 
 //     // .probe10()   // input wire [7:0]  probe6 
-//     // .probe12(video_de_posedge),   // video_deÉÏÉıÑØ¼ì²â
-//     // .probe13(video_de_negedge)    // video_deÏÂ½µÑØ¼ì²â
+//     // .probe12(video_de_posedge),   // video_deä¸Šå‡æ²¿æ£€æµ‹
+//     // .probe13(video_de_negedge)    // video_deä¸‹é™æ²¿æ£€æµ‹
 //     // .probe12(test_valid),   // input wire [7:0]  probe6 
 //     // .probe13(test_data)    // input wire [0:0]  probe5 
 // );
 
 //==========================================================================
-// »·ĞÎ¶ÓÁĞ×´Ì¬ÅĞ¶Ï
+// ç¯å½¢é˜Ÿåˆ—çŠ¶æ€åˆ¤æ–­
 //==========================================================================
-// ¼ÆËãÏÂÒ»¸öĞ´Ö¸Õë
+// è®¡ç®—ä¸‹ä¸€ä¸ªå†™æŒ‡é’ˆ
 always @(*) begin
     hdmi_next_wr_ptr = (hdmi_wr_ptr == RING_DEPTH-1) ? {RING_ADDR_WIDTH{1'b0}} : hdmi_wr_ptr + 1'b1;
 end
 
-// »·ĞÎ¶ÓÁĞÂúÅĞ¶Ï£¨Ğ´Ê±ÖÓÓò£©
+// ç¯å½¢é˜Ÿåˆ—æ»¡åˆ¤æ–­ï¼ˆå†™æ—¶é’ŸåŸŸï¼‰
 assign hdmi_ring_full = (hdmi_next_wr_ptr == hdmi_rd_ptr);
 
-// »·ĞÎ¶ÓÁĞ¿ÕÅĞ¶Ï£¨¶ÁÊ±ÖÓÓò£©
+// ç¯å½¢é˜Ÿåˆ—ç©ºåˆ¤æ–­ï¼ˆè¯»æ—¶é’ŸåŸŸï¼‰
 assign hdmi_ring_empty = (hdmi_rd_ptr == hdmi_sync_wr_ptr);
 
 //==========================================================================
-// »·ĞÎ¶ÓÁĞĞ´ÈëÂß¼­£¨148.5MHzÊ±ÖÓÓò£©
-// Ö»ÔÊĞíÔÚwr_clkÊ±ÖÓÓò¶Ôhdmi_ring_data¸³ÖµºÍÇåÁã£¬±ÜÃâ¶àÇı¶¯´íÎó
+// ç¯å½¢é˜Ÿåˆ—å†™å…¥é€»è¾‘ï¼ˆ148.5MHzæ—¶é’ŸåŸŸï¼‰
+// åªå…è®¸åœ¨wr_clkæ—¶é’ŸåŸŸå¯¹hdmi_ring_dataèµ‹å€¼å’Œæ¸…é›¶ï¼Œé¿å…å¤šé©±åŠ¨é”™è¯¯
 //==========================================================================
-integer i;  // ÓÃÓÚÑ­»·³õÊ¼»¯µÄË÷Òı±äÁ¿
+integer i;  // ç”¨äºå¾ªç¯åˆå§‹åŒ–çš„ç´¢å¼•å˜é‡
 
 always @(posedge wr_clk or negedge sys_rst_n) begin
     if (!sys_rst_n) begin
         hdmi_wr_ptr <= {RING_ADDR_WIDTH{1'b0}};
         hdmi_clear_sync1 <= 1'b0;
         hdmi_clear_sync2 <= 1'b0;
-        // ³õÊ¼»¯»·ĞÎ¶ÓÁĞ
+        // åˆå§‹åŒ–ç¯å½¢é˜Ÿåˆ—
         for(i = 0; i < RING_DEPTH; i = i + 1) begin
             hdmi_ring_data[i] <= 64'd0;
         end
     end else begin
-        // Í¬²½hdmi_clear_allĞÅºÅµ½Ğ´Ê±ÖÓÓò
+        // åŒæ­¥hdmi_clear_allä¿¡å·åˆ°å†™æ—¶é’ŸåŸŸ
         hdmi_clear_sync1 <= hdmi_clear_all;
         hdmi_clear_sync2 <= hdmi_clear_sync1;
-        // ¼ì²âµ½ÇåÁãĞÅºÅÊ±ÇåÁãĞ´Ö¸ÕëºÍ»·ĞÎ¶ÓÁĞ
+        // æ£€æµ‹åˆ°æ¸…é›¶ä¿¡å·æ—¶æ¸…é›¶å†™æŒ‡é’ˆå’Œç¯å½¢é˜Ÿåˆ—
         if (hdmi_clear_sync2) begin
             hdmi_wr_ptr <= {RING_ADDR_WIDTH{1'b0}};
             for(i = 0; i < RING_DEPTH; i = i + 1) begin
                 hdmi_ring_data[i] <= 64'd0;
             end
         end else begin
-            // µ±ÓĞÓĞĞ§Êı¾İÇÒ¶ÓÁĞ²»ÂúÊ±£¬Ğ´ÈëÊı¾İ
+            // å½“æœ‰æœ‰æ•ˆæ•°æ®ä¸”é˜Ÿåˆ—ä¸æ»¡æ—¶ï¼Œå†™å…¥æ•°æ®
             if (hdmi_data_valid && !hdmi_ring_full) begin
-                hdmi_ring_data[hdmi_wr_ptr] <= hdmi_data;           // Ğ´Èë64Î»HDMIÊı¾İ
-                hdmi_wr_ptr <= hdmi_next_wr_ptr;                    // ÒÆ¶¯Ğ´Ö¸Õë
+                hdmi_ring_data[hdmi_wr_ptr] <= hdmi_data;           // å†™å…¥64ä½HDMIæ•°æ®
+                hdmi_wr_ptr <= hdmi_next_wr_ptr;                    // ç§»åŠ¨å†™æŒ‡é’ˆ
             end
         end
     end
 end
 
 //==========================================================================
-// ¿çÊ±ÖÓÓòÍ¬²½£¨156.25MHzÊ±ÖÓÓò£©
+// è·¨æ—¶é’ŸåŸŸåŒæ­¥ï¼ˆ156.25MHzæ—¶é’ŸåŸŸï¼‰
 //==========================================================================
 always @(posedge tx_clk_out or negedge sys_rst_n) begin
     if (!sys_rst_n) begin
         hdmi_sync_wr_ptr_1 <= {RING_ADDR_WIDTH{1'b0}};
         hdmi_sync_wr_ptr <= {RING_ADDR_WIDTH{1'b0}};
     end else begin
-        hdmi_sync_wr_ptr_1 <= hdmi_wr_ptr;                     // µÚÒ»¼¶Í¬²½
-        hdmi_sync_wr_ptr <= hdmi_sync_wr_ptr_1;                // µÚ¶ş¼¶Í¬²½
+        hdmi_sync_wr_ptr_1 <= hdmi_wr_ptr;                     // ç¬¬ä¸€çº§åŒæ­¥
+        hdmi_sync_wr_ptr <= hdmi_sync_wr_ptr_1;                // ç¬¬äºŒçº§åŒæ­¥
     end
 end
 
 //==========================================================================
-// SFP·¢ËÍÂß¼­£¨156.25MHzÊ±ÖÓÓò£©
-// ×¢Òâ£º´Ë´¦²»ÔÙ¶Ôhdmi_ring_dataÊı×é½øĞĞÈÎºÎ¸³Öµ»òÇåÁã²Ù×÷£¡
+// SFPå‘é€é€»è¾‘ï¼ˆ156.25MHzæ—¶é’ŸåŸŸï¼‰
+// æ³¨æ„ï¼šæ­¤å¤„ä¸å†å¯¹hdmi_ring_dataæ•°ç»„è¿›è¡Œä»»ä½•èµ‹å€¼æˆ–æ¸…é›¶æ“ä½œï¼
 //==========================================================================
 always @(posedge tx_clk_out or negedge sys_rst_n) begin
     if (!sys_rst_n) begin
@@ -277,48 +277,48 @@ always @(posedge tx_clk_out or negedge sys_rst_n) begin
         hdmi_boundary_detected <= 1'b0;
         hdmi_boundary_delay_cnt <= 4'd0;
     end else begin
-        // Ä¬ÈÏÊä³ö
+        // é»˜è®¤è¾“å‡º
         axis_to_sfp_tvalid <= 1'b0;
         axis_to_sfp_tdata  <= 64'h0;
         axis_to_sfp_tlast  <= 1'b0;
         axis_to_sfp_tkeep  <= 8'h0;
 
-        // ±ß½çÊı¾İÑÓÊ±ÇåÁãÂß¼­
+        // è¾¹ç•Œæ•°æ®å»¶æ—¶æ¸…é›¶é€»è¾‘
         if (hdmi_clear_all) begin
-            // Ö»ÇåÁã¶ÁÖ¸ÕëºÍÏà¹Ø±êÖ¾£¬²»ÔÙÇåÁãhdmi_ring_dataÊı×é
+            // åªæ¸…é›¶è¯»æŒ‡é’ˆå’Œç›¸å…³æ ‡å¿—ï¼Œä¸å†æ¸…é›¶hdmi_ring_dataæ•°ç»„
             hdmi_rd_ptr <= {RING_ADDR_WIDTH{1'b0}};
-            hdmi_boundary_detected <= 1'b0;      // Çå³ı¼ì²â±êÖ¾
-            hdmi_boundary_delay_cnt <= 4'd0;     // ÇåÁã¼ÆÊıÆ÷
+            hdmi_boundary_detected <= 1'b0;      // æ¸…é™¤æ£€æµ‹æ ‡å¿—
+            hdmi_boundary_delay_cnt <= 4'd0;     // æ¸…é›¶è®¡æ•°å™¨
         end else if (hdmi_boundary_detected) begin
-            // ±ß½çÊı¾İ¼ì²âºó¿ªÊ¼ÑÓÊ±¼ÆÊı
+            // è¾¹ç•Œæ•°æ®æ£€æµ‹åå¼€å§‹å»¶æ—¶è®¡æ•°
             hdmi_boundary_delay_cnt <= hdmi_boundary_delay_cnt + 1'b1;
         end
 
-        // ¸ù¾İLOCAL_NODE_INFOµÍ4Î»ÖĞ1µÄÎ»ÖÃÂÖÑ¯·¢ËÍ
+        // æ ¹æ®LOCAL_NODE_INFOä½4ä½ä¸­1çš„ä½ç½®è½®è¯¢å‘é€
         case (send_type_cnt)
-            4'd0: begin  // µÚ0ÀàÊı¾İ£¬HDMIÊı¾İ
-                if (LOCAL_NODE_INFO[1]) begin  // µÚ1Î»¶ÔÓ¦HDMIÊı¾İ
+            4'd0: begin  // ç¬¬0ç±»æ•°æ®ï¼ŒHDMIæ•°æ®
+                if (LOCAL_NODE_INFO[1]) begin  // ç¬¬1ä½å¯¹åº”HDMIæ•°æ®
                     if (!hdmi_ring_empty && axis_to_sfp_tready) begin
-                        // Ö±½ÓÊä³ö»·ĞÎ¶ÓÁĞÊı¾İ
+                        // ç›´æ¥è¾“å‡ºç¯å½¢é˜Ÿåˆ—æ•°æ®
                         axis_to_sfp_tvalid <= 1'b1;
                         axis_to_sfp_tdata  <= hdmi_ring_data[hdmi_rd_ptr];
                         axis_to_sfp_tkeep  <= 8'hFF;
-                        // ¸ù¾İÊı¾İÀàĞÍÉèÖÃtlast
+                        // æ ¹æ®æ•°æ®ç±»å‹è®¾ç½®tlast
                         if ((hdmi_ring_data[hdmi_rd_ptr][15:14] == 2'd3) || (hdmi_ring_data[hdmi_rd_ptr][15:14] == 2'd1))
                             axis_to_sfp_tlast <= 1'b1;
                         else
                             axis_to_sfp_tlast <= 1'b0;
                         
-                        // ¼ì²âÊÇ·ñÎª±ß½çÊı¾İ
+                        // æ£€æµ‹æ˜¯å¦ä¸ºè¾¹ç•Œæ•°æ®
                         if (hdmi_ring_data[hdmi_rd_ptr] == BOUNDARY_DATA) begin
-                            hdmi_boundary_detected <= 1'b1;  // ÉèÖÃ±ß½ç¼ì²â±êÖ¾
-                            hdmi_boundary_delay_cnt <= 4'd0; // ¿ªÊ¼¼ÆÊı
+                            hdmi_boundary_detected <= 1'b1;  // è®¾ç½®è¾¹ç•Œæ£€æµ‹æ ‡å¿—
+                            hdmi_boundary_delay_cnt <= 4'd0; // å¼€å§‹è®¡æ•°
                         end
                         
-                        // ¶ÁÍêºóÒÆ¶¯Ö¸Õë
+                        // è¯»å®Œåç§»åŠ¨æŒ‡é’ˆ
                         hdmi_rd_ptr <= (hdmi_rd_ptr == RING_DEPTH-1) ? {RING_ADDR_WIDTH{1'b0}} : hdmi_rd_ptr + 1'b1;
                     end else begin
-                        // »·ĞÎ¶ÓÁĞ¿ÕÊ±£¬tvalidÎª1£¬Êä³öÈ«0Êı¾İ
+                        // ç¯å½¢é˜Ÿåˆ—ç©ºæ—¶ï¼Œtvalidä¸º1ï¼Œè¾“å‡ºå…¨0æ•°æ®
                         axis_to_sfp_tvalid <= 1'b1;
                         axis_to_sfp_tdata  <= 64'h0;
                         axis_to_sfp_tlast  <= 1'b0;
@@ -326,69 +326,69 @@ always @(posedge tx_clk_out or negedge sys_rst_n) begin
                     end
                 end
                 
-                // ×´Ì¬×ª»»£º¸ù¾İLOCAL_NODE_INFO¾ö¶¨ÏÂÒ»¸ö×´Ì¬
+                // çŠ¶æ€è½¬æ¢ï¼šæ ¹æ®LOCAL_NODE_INFOå†³å®šä¸‹ä¸€ä¸ªçŠ¶æ€
                 if (LOCAL_NODE_INFO[0]) begin
-                    send_type_cnt <= 4'd1;  // ÏÂÒ»¸öÊÇµÚ0ÀàÊı¾İ
+                    send_type_cnt <= 4'd1;  // ä¸‹ä¸€ä¸ªæ˜¯ç¬¬0ç±»æ•°æ®
                 end else if (LOCAL_NODE_INFO[2]) begin
-                    send_type_cnt <= 4'd2;  // ÏÂÒ»¸öÊÇµÚ2ÀàÊı¾İ
+                    send_type_cnt <= 4'd2;  // ä¸‹ä¸€ä¸ªæ˜¯ç¬¬2ç±»æ•°æ®
                 end else if (LOCAL_NODE_INFO[3]) begin
-                    send_type_cnt <= 4'd3;  // ÏÂÒ»¸öÊÇµÚ3ÀàÊı¾İ
+                    send_type_cnt <= 4'd3;  // ä¸‹ä¸€ä¸ªæ˜¯ç¬¬3ç±»æ•°æ®
                 end else begin
-                    send_type_cnt <= 4'd0;  // Ö»ÓĞµÚ1ÀàÊı¾İ£¬±£³ÖÔÚµ±Ç°×´Ì¬
+                    send_type_cnt <= 4'd0;  // åªæœ‰ç¬¬1ç±»æ•°æ®ï¼Œä¿æŒåœ¨å½“å‰çŠ¶æ€
                 end
             end
             
-            4'd1: begin  // µÚ1ÀàÊı¾İ£¨LOCAL_NODE_INFO[0]¶ÔÓ¦µÄÊı¾İÀàĞÍ£©
+            4'd1: begin  // ç¬¬1ç±»æ•°æ®ï¼ˆLOCAL_NODE_INFO[0]å¯¹åº”çš„æ•°æ®ç±»å‹ï¼‰
                 if (LOCAL_NODE_INFO[0]) begin
-                    // ÕâÀï¿ÉÒÔÌí¼ÓµÚ0ÀàÊı¾İµÄ´¦ÀíÂß¼­
-                    // µ±Ç°Ö»ÊÇÕ¼Î»£¬²»·¢ËÍÊı¾İ
+                    // è¿™é‡Œå¯ä»¥æ·»åŠ ç¬¬0ç±»æ•°æ®çš„å¤„ç†é€»è¾‘
+                    // å½“å‰åªæ˜¯å ä½ï¼Œä¸å‘é€æ•°æ®
                 end
                 
-                // ×´Ì¬×ª»»£ºÌø×ªµ½ÏÂÒ»¸öÓĞĞ§×´Ì¬
+                // çŠ¶æ€è½¬æ¢ï¼šè·³è½¬åˆ°ä¸‹ä¸€ä¸ªæœ‰æ•ˆçŠ¶æ€
                 if (LOCAL_NODE_INFO[1]) begin
-                    send_type_cnt <= 4'd0;  // »Øµ½HDMIÊı¾İ
+                    send_type_cnt <= 4'd0;  // å›åˆ°HDMIæ•°æ®
                 end else if (LOCAL_NODE_INFO[2]) begin
-                    send_type_cnt <= 4'd2;  // ÏÂÒ»¸öÊÇµÚ2ÀàÊı¾İ
+                    send_type_cnt <= 4'd2;  // ä¸‹ä¸€ä¸ªæ˜¯ç¬¬2ç±»æ•°æ®
                 end else if (LOCAL_NODE_INFO[3]) begin
-                    send_type_cnt <= 4'd3;  // ÏÂÒ»¸öÊÇµÚ3ÀàÊı¾İ
+                    send_type_cnt <= 4'd3;  // ä¸‹ä¸€ä¸ªæ˜¯ç¬¬3ç±»æ•°æ®
                 end else begin
-                    send_type_cnt <= 4'd1;  // Ö»ÓĞµÚ0ÀàÊı¾İ£¬±£³ÖÔÚµ±Ç°×´Ì¬
+                    send_type_cnt <= 4'd1;  // åªæœ‰ç¬¬0ç±»æ•°æ®ï¼Œä¿æŒåœ¨å½“å‰çŠ¶æ€
                 end
             end
             
-            4'd2: begin  // µÚ2ÀàÊı¾İ£¨LOCAL_NODE_INFO[2]¶ÔÓ¦µÄÊı¾İÀàĞÍ£©
+            4'd2: begin  // ç¬¬2ç±»æ•°æ®ï¼ˆLOCAL_NODE_INFO[2]å¯¹åº”çš„æ•°æ®ç±»å‹ï¼‰
                 if (LOCAL_NODE_INFO[2]) begin
-                    // ÕâÀï¿ÉÒÔÌí¼ÓµÚ2ÀàÊı¾İµÄ´¦ÀíÂß¼­
-                    // µ±Ç°Ö»ÊÇÕ¼Î»£¬²»·¢ËÍÊı¾İ
+                    // è¿™é‡Œå¯ä»¥æ·»åŠ ç¬¬2ç±»æ•°æ®çš„å¤„ç†é€»è¾‘
+                    // å½“å‰åªæ˜¯å ä½ï¼Œä¸å‘é€æ•°æ®
                 end
                 
-                // ×´Ì¬×ª»»£ºÌø×ªµ½ÏÂÒ»¸öÓĞĞ§×´Ì¬
+                // çŠ¶æ€è½¬æ¢ï¼šè·³è½¬åˆ°ä¸‹ä¸€ä¸ªæœ‰æ•ˆçŠ¶æ€
                 if (LOCAL_NODE_INFO[1]) begin
-                    send_type_cnt <= 4'd0;  // »Øµ½HDMIÊı¾İ
+                    send_type_cnt <= 4'd0;  // å›åˆ°HDMIæ•°æ®
                 end else if (LOCAL_NODE_INFO[0]) begin
-                    send_type_cnt <= 4'd1;  // »Øµ½µÚ0ÀàÊı¾İ
+                    send_type_cnt <= 4'd1;  // å›åˆ°ç¬¬0ç±»æ•°æ®
                 end else if (LOCAL_NODE_INFO[3]) begin
-                    send_type_cnt <= 4'd3;  // ÏÂÒ»¸öÊÇµÚ3ÀàÊı¾İ
+                    send_type_cnt <= 4'd3;  // ä¸‹ä¸€ä¸ªæ˜¯ç¬¬3ç±»æ•°æ®
                 end else begin
-                    send_type_cnt <= 4'd2;  // Ö»ÓĞµÚ2ÀàÊı¾İ£¬±£³ÖÔÚµ±Ç°×´Ì¬
+                    send_type_cnt <= 4'd2;  // åªæœ‰ç¬¬2ç±»æ•°æ®ï¼Œä¿æŒåœ¨å½“å‰çŠ¶æ€
                 end
             end
             
-            4'd3: begin  // µÚ3ÀàÊı¾İ£¨LOCAL_NODE_INFO[3]¶ÔÓ¦µÄÊı¾İÀàĞÍ£©
+            4'd3: begin  // ç¬¬3ç±»æ•°æ®ï¼ˆLOCAL_NODE_INFO[3]å¯¹åº”çš„æ•°æ®ç±»å‹ï¼‰
                 if (LOCAL_NODE_INFO[3]) begin
-                    // ÕâÀï¿ÉÒÔÌí¼ÓµÚ3ÀàÊı¾İµÄ´¦ÀíÂß¼­
-                    // µ±Ç°Ö»ÊÇÕ¼Î»£¬²»·¢ËÍÊı¾İ
+                    // è¿™é‡Œå¯ä»¥æ·»åŠ ç¬¬3ç±»æ•°æ®çš„å¤„ç†é€»è¾‘
+                    // å½“å‰åªæ˜¯å ä½ï¼Œä¸å‘é€æ•°æ®
                 end
                 
-                // ×´Ì¬×ª»»£ºÌø×ªµ½ÏÂÒ»¸öÓĞĞ§×´Ì¬
+                // çŠ¶æ€è½¬æ¢ï¼šè·³è½¬åˆ°ä¸‹ä¸€ä¸ªæœ‰æ•ˆçŠ¶æ€
                 if (LOCAL_NODE_INFO[1]) begin
-                    send_type_cnt <= 4'd0;  // »Øµ½HDMIÊı¾İ
+                    send_type_cnt <= 4'd0;  // å›åˆ°HDMIæ•°æ®
                 end else if (LOCAL_NODE_INFO[0]) begin
-                    send_type_cnt <= 4'd1;  // »Øµ½µÚ0ÀàÊı¾İ
+                    send_type_cnt <= 4'd1;  // å›åˆ°ç¬¬0ç±»æ•°æ®
                 end else if (LOCAL_NODE_INFO[2]) begin
-                    send_type_cnt <= 4'd2;  // »Øµ½µÚ2ÀàÊı¾İ
+                    send_type_cnt <= 4'd2;  // å›åˆ°ç¬¬2ç±»æ•°æ®
                 end else begin
-                    send_type_cnt <= 4'd3;  // Ö»ÓĞµÚ3ÀàÊı¾İ£¬±£³ÖÔÚµ±Ç°×´Ì¬
+                    send_type_cnt <= 4'd3;  // åªæœ‰ç¬¬3ç±»æ•°æ®ï¼Œä¿æŒåœ¨å½“å‰çŠ¶æ€
                 end
             end
             
@@ -397,7 +397,7 @@ always @(posedge tx_clk_out or negedge sys_rst_n) begin
             end
         endcase
         
-        // µ±LOCAL_NODE_INFOÈ«Îª0Ê±£¬·¢ËÍ½ÚµãĞÅÏ¢
+        // å½“LOCAL_NODE_INFOå…¨ä¸º0æ—¶ï¼Œå‘é€èŠ‚ç‚¹ä¿¡æ¯
         if (LOCAL_NODE_INFO[3:0] == 4'h0) begin
             axis_to_sfp_tvalid <= 1'b1;
             axis_to_sfp_tdata <= {56'h0, LOCAL_NODE_INFO[7:4], 4'h0};
@@ -406,45 +406,45 @@ always @(posedge tx_clk_out or negedge sys_rst_n) begin
         end
     end
 end
-// ÇåÁãĞÅºÅ£ºµ±ÑÓÊ±¼ÆÊıµ½8Ê±´¥·¢
+// æ¸…é›¶ä¿¡å·ï¼šå½“å»¶æ—¶è®¡æ•°åˆ°8æ—¶è§¦å‘
 assign hdmi_clear_all = hdmi_boundary_detected && (hdmi_boundary_delay_cnt == 4'd7);
 
 //==========================================================================
-// SFP½ÓÊÕÂß¼­£¨156.25MHzÊ±ÖÓÓò£©
+// SFPæ¥æ”¶é€»è¾‘ï¼ˆ156.25MHzæ—¶é’ŸåŸŸï¼‰
 //==========================================================================
 always @(posedge tx_clk_out or negedge sys_rst_n) begin
     if (!sys_rst_n) begin
-        // ¸´Î»Ê±ÇåÁãËùÓĞÊä³öĞÅºÅ
+        // å¤ä½æ—¶æ¸…é›¶æ‰€æœ‰è¾“å‡ºä¿¡å·
         hdmi_axi_rx_valid <= 1'b0;
         hdmi_axi_rx_data <= 64'h0;
         // hdmi_axi_rx_keep <= 8'h0;
     end else begin
         if (sfp_to_axis_tvalid) begin
-            // ¼ì²éÊı¾İÀàĞÍ×Ö¶Î£¬¸ù¾İÀàĞÍ·Ö·¢Êı¾İ
-            case (sfp_to_axis_tdata[3:0])  // ¼ì²éÊı¾İÀàĞÍ(¸ß4Î»)
-                DATA_TYPE_HDMI: begin  // HDMIÊı¾İÀàĞÍ
+            // æ£€æŸ¥æ•°æ®ç±»å‹å­—æ®µï¼Œæ ¹æ®ç±»å‹åˆ†å‘æ•°æ®
+            case (sfp_to_axis_tdata[3:0])  // æ£€æŸ¥æ•°æ®ç±»å‹(é«˜4ä½)
+                DATA_TYPE_HDMI: begin  // HDMIæ•°æ®ç±»å‹
                     hdmi_axi_rx_valid <= 1'b1;
                     hdmi_axi_rx_data <= sfp_to_axis_tdata;
                     // hdmi_axi_rx_keep <= sfp_to_axis_tkeep;
                 end
-                DATA_TYPE_ETH: begin   // ÒÔÌ«ÍøÊı¾İÀàĞÍ(Ô¤Áô)
-                    // ÔİÊ±²»´¦ÀíÒÔÌ«ÍøÊı¾İ
+                DATA_TYPE_ETH: begin   // ä»¥å¤ªç½‘æ•°æ®ç±»å‹(é¢„ç•™)
+                    // æš‚æ—¶ä¸å¤„ç†ä»¥å¤ªç½‘æ•°æ®
                     hdmi_axi_rx_valid <= 1'b0;
                 end
-                default: begin         // Î´ÖªÊı¾İÀàĞÍ
+                default: begin         // æœªçŸ¥æ•°æ®ç±»å‹
                     hdmi_axi_rx_valid <= 1'b0;
                 end
             endcase
         end else begin
-            // Ã»ÓĞÓĞĞ§Êı¾İÊ±£¬ÇåÁãÊä³ö
+            // æ²¡æœ‰æœ‰æ•ˆæ•°æ®æ—¶ï¼Œæ¸…é›¶è¾“å‡º
             hdmi_axi_rx_valid <= 1'b0;
         end
     end
 end
 
-// ÒÔÌ«ÍøºËÀı»¯
+// ä»¥å¤ªç½‘æ ¸ä¾‹åŒ–
 xxv_ethernet_0 u_xxv_ethernet_0 (
-  //¹â¿Ú²î·ÖÊı¾İ
+  //å…‰å£å·®åˆ†æ•°æ®
   .gt_rxp_in_0              (rxp_in),    // input wire gt_rxp_in_0
   .gt_rxn_in_0              (rxn_in),    // input wire gt_rxn_in_0
   .gt_txp_out_0             (txp_out),   // output wire gt_txp_out_0
@@ -471,7 +471,7 @@ xxv_ethernet_0 u_xxv_ethernet_0 (
   .gt_loopback_in_0         (3'b000),   // input wire [2 : 0] gt_loopback_in_0
   .qpllreset_in_0           (1'b0),      // input wire qpllreset_in_0
 
-  //¹â¿Ú²Î¿¼Ê±ÖÓ
+  //å…‰å£å‚è€ƒæ—¶é’Ÿ
   .gt_refclk_p              (q0_ck1_p_in),  // input wire gt_refclk_p
   .gt_refclk_n              (q0_ck1_n_in),  // input wire gt_refclk_n
   
@@ -479,7 +479,7 @@ xxv_ethernet_0 u_xxv_ethernet_0 (
   .gtpowergood_out_0        (gtpowergood_out_0),    // output wire gtpowergood_out_0
   .user_rx_reset_0          (rx_reset),  // output wire user_rx_reset_0
   
-  //AXI4 Stream ·¢Éä½Ó¿ÚĞÅºÅ
+  //AXI4 Stream å‘å°„æ¥å£ä¿¡å·
   .tx_axis_tready_0        (axis_to_sfp_tready),
   .tx_axis_tvalid_0        (axis_to_sfp_tvalid),
   .tx_axis_tdata_0         (axis_to_sfp_tdata),
@@ -488,7 +488,7 @@ xxv_ethernet_0 u_xxv_ethernet_0 (
   .tx_axis_tuser_0         (1'b0),
   .tx_preamblein_0         (56'b0),            // input wire [55 : 0] tx_preamblein_0
   
-  //RX ¿ØÖÆĞÅºÅ
+  //RX æ§åˆ¶ä¿¡å·
   .ctl_rx_enable_0                  (1'b1), // input wire ctl_rx_enable_0
   .ctl_rx_check_preamble_0          (1'b0), // input wire ctl_rx_check_preamble_0
   .ctl_rx_check_sfd_0               (1'b0), // input wire ctl_rx_check_sfd_0
@@ -503,7 +503,7 @@ xxv_ethernet_0 u_xxv_ethernet_0 (
   .ctl_rx_test_pattern_enable_0     (1'b0), // input wire ctl_rx_test_pattern_enable_0
   .ctl_rx_custom_preamble_enable_0  (1'b0), // input wire ctl_rx_custom_preamble_enable_0
   
-  //RX ·¢ËÍ×´Ì¬ĞÅºÅ
+  //RX å‘é€çŠ¶æ€ä¿¡å·
   .stat_rx_framing_err_0            ( ),    // output wire stat_rx_framing_err_0
   .stat_rx_framing_err_valid_0      ( ),    // output wire stat_rx_framing_err_valid_0
   .stat_rx_local_fault_0            ( ),    // output wire stat_rx_local_fault_0
@@ -552,7 +552,7 @@ xxv_ethernet_0 u_xxv_ethernet_0 (
   .stat_rx_bad_sfd_0                ( ),    // output wire stat_rx_bad_sfd_0
   .stat_rx_bad_preamble_0           ( ),    // output wire stat_rx_bad_preamble_0
   
-  //AXI4 Stream ½ÓÊÕ½Ó¿ÚĞÅºÅ
+  //AXI4 Stream æ¥æ”¶æ¥å£ä¿¡å·
   .rx_axis_tvalid_0        (sfp_to_axis_tvalid),
   .rx_axis_tdata_0         (sfp_to_axis_tdata), 
   .rx_axis_tlast_0         (sfp_to_axis_tlast),
@@ -561,7 +561,7 @@ xxv_ethernet_0 u_xxv_ethernet_0 (
   
   .tx_unfout_0                    ( ),                // output wire tx_unfout_0
 
-  //TX ×´Ì¬ĞÅºÅ
+  //TX çŠ¶æ€ä¿¡å·
   .stat_tx_local_fault_0            ( ),        // output wire stat_tx_local_fault_0
   .stat_tx_total_bytes_0            ( ),        // output wire [3 : 0] stat_tx_total_bytes_0
   .stat_tx_total_packets_0          ( ),        // output wire stat_tx_total_packets_0
@@ -588,7 +588,7 @@ xxv_ethernet_0 u_xxv_ethernet_0 (
   .stat_tx_vlan_0                   ( ),        // output wire stat_tx_vlan_0
   .stat_tx_frame_error_0            ( ),        // output wire stat_tx_frame_error_0
   
-  //AXI4?Stream ½Ó¿Ú - TX Â·¾¶¿ØÖÆĞÅºÅºÍ×´Ì¬ĞÅºÅ
+  //AXI4?Stream æ¥å£ - TX è·¯å¾„æ§åˆ¶ä¿¡å·å’ŒçŠ¶æ€ä¿¡å·
   .ctl_tx_enable_0                  (1'b1),     // input wire ctl_tx_enable_0
   .ctl_tx_send_rfi_0                (1'b0),     // input wire ctl_tx_send_rfi_0
   .ctl_tx_send_lfi_0                (1'b0),     // input wire ctl_tx_send_lfi_0
@@ -606,6 +606,6 @@ xxv_ethernet_0 u_xxv_ethernet_0 (
   
   .ctl_tx_custom_preamble_enable_0  (1'b0)     // input wire ctl_tx_custom_preamble_enable_0
 );
-assign  tx_disable = 2'b00;                     //´ò¿ª¹â¿Ú
+assign  tx_disable = 1'b0;                      //æ‰“å¼€å…‰å£
 // assign  sfp_init_done = stat_rx_status;
 endmodule 
